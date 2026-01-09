@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Horizon Okinawa | 公式サイトサンプル</title>
+    <meta name="description" content="沖縄の隠れ家リゾート、アズール・ホライズン・沖縄。海と空に溶け込む極上の滞在を。">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           Base Settings & Variables
+           ========================================= */
+        :root {
+            --color-primary: #0F4C81;   /* 深い海の色 */
+            --color-secondary: #BFA588; /* 砂浜の色（ゴールド系） */
+            --color-text: #333333;      /* 通常テキスト */
+            --color-bg: #F9F9F9;        /* 全体背景 */
+            --color-white: #FFFFFF;
+            
+            --font-serif: 'Shippori Mincho', serif;
+            --font-sans: 'Helvetica Neue', Arial, sans-serif;
+            
+            --spacing-section: 100px;
+            --width-container: 1000px;
+            --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1); /* 上品な動きのイージング */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-serif);
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* 横スクロール防止 */
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            vertical-align: bottom;
+        }
+
+        /* =========================================
+           Animation Utilities
+           ========================================= */
+        /* 下からふわっと現れるアニメーション */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s var(--ease-out-cubic), transform 1.2s var(--ease-out-cubic);
+            will-change: opacity, transform;
+        }
+
+        .fade-in-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 順番に表示させるための遅延クラス */
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+
+        /* =========================================
+           Components
+           ========================================= */
+        .container {
+            max-width: var(--width-container);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--color-secondary);
+            margin-bottom: 60px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            display: block;
+        }
+
+        /* =========================================
+           Header & Logo Styles (Updated)
+           ========================================= */
+        .site-header {
+            background-color: rgba(255, 255, 255, 0.98);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 20px;
+        }
+
+        /* ロゴ全体のレイアウト */
+        .logo {
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* クリック可能なリンクとしてのスタイル */
+        .logo a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--color-primary);
+            gap: 12px;
+            transition: opacity 0.3s;
+        }
+
+        .logo a:hover {
+            opacity: 0.7;
+        }
+
+        /* SVGアイコンの設定 */
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            color: var(--color-secondary);
+            flex-shrink: 0;
+        }
+
+        /* 文字グループのレイアウト */
+        .logo-text-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-main {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            letter-spacing: 0.05em;
+            line-height: 1.1;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            display: block;
+            letter-spacing: 0.3em;
+            color: var(--color-secondary);
+            margin-top: 2px;
+            font-family: var(--font-sans);
+        }
+
+        /* ナビゲーション */
+        .global-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 30px;
+        }
+
+        .global-nav a {
+            text-decoration: none;
+            color: var(--color-text);
+            font-size: 0.95rem;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        /* ホバー時の下線アニメーション */
+        .global-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--color-secondary);
+            transition: width 0.3s;
+        }
+
+        .global-nav a:hover::after {
+            width: 100%;
+        }
+
+        .btn-reserve {
+            background-color: var(--color-primary);
+            color: var(--color-white) !important;
+            padding: 10px 20px;
+            border-radius: 2px;
+            transition: background-color 0.3s, transform 0.3s !important;
+        }
+
+        .btn-reserve:hover {
+            background-color: #0a355c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(15, 76, 129, 0.3);
+        }
+        
+        .btn-reserve::after { display: none; }
+
+        /* =========================================
+           Hero Section
+           ========================================= */
+        .hero {
+            height: 100vh;
+            /* パララックス効果（背景固定） */
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-copy {
+            color: var(--color-white);
+            font-size: 3rem;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: 0.1em;
+            animation: fadeIn 2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* =========================================
+           Concept
+           ========================================= */
+        .section-concept {
+            padding: var(--spacing-section) 0;
+        }
+
+        .concept-text {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .concept-text p {
+            margin-bottom: 2rem;
+        }
+
+        /* =========================================
+           Guest Rooms
+           ========================================= */
+        .section-rooms {
+            padding: var(--spacing-section) 0;
+            background-color: var(--color-white);
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .room-card {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            background: #fff;
+            transition: transform 0.4s var(--ease-out-cubic), box-shadow 0.4s;
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .room-image-placeholder {
+            background-color: #e0e0e0;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .room-info {
+            padding: 30px;
+        }
+
+        .room-info h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        .room-spec {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        /* =========================================
+           Restaurant
+           ========================================= */
+        .section-restaurant {
+            padding: var(--spacing-section) 0;
+        }
+
+        .restaurant-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .restaurant-desc {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .restaurant-images {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .img-box {
+            flex: 1;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.8rem;
+            background-color: #ccc;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .menu-list {
+            margin-top: 40px;
+            background: #fff;
+            padding: 30px;
+            border-left: 3px solid var(--color-secondary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+
+        .menu-list h4 {
+            margin-top: 0;
+            color: var(--color-primary);
+        }
+
+        .menu-list dl {
+            margin: 0;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px 20px;
+        }
+
+        .menu-list dt {
+            font-weight: bold;
+            color: var(--color-secondary);
+        }
+
+        .menu-list dd {
+            margin: 0;
+        }
+
+        /* =========================================
+           Access
+           ========================================= */
+        .section-access {
+            padding: var(--spacing-section) 0;
+            background-color: var(--color-white);
+        }
+
+        .access-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .access-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .access-info address {
+            font-style: normal;
+            margin-bottom: 30px;
+            line-height: 2;
+        }
+
+        .tel {
+            display: block;
+            font-size: 1.2rem;
+            color: var(--color-primary);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .map-wrapper {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .map-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 350px;
+            filter: grayscale(0.3);
+            border-radius: 4px;
+        }
+
+        /* =========================================
+           Reservation
+           ========================================= */
+        .section-reservation {
+            padding: var(--spacing-section) 0;
+            background-color: #eee;
+        }
+
+        .form-lead {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .reservation-form {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .required {
+            background: #cc0000;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 2px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background-color: #fafafa;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--color-primary);
+            color: #fff;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.3s;
+            border-radius: 2px;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        /* =========================================
+           Footer
+           ========================================= */
+        .site-footer {
+            background-color: var(--color-primary);
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+            font-size: 0.8rem;
+        }
+
+        .footer-note {
+            opacity: 0.6;
+            margin-top: 10px;
+        }
+
+        /* =========================================
+           Responsive (Mobile)
+           ========================================= */
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .global-nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero-copy {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .reservation-form {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <h1 class="logo">
+                <a href="#">
+                    <svg class="logo-icon" viewBox="0 0 64 64" aria-hidden="true">
+                        <circle cx="32" cy="24" r="10" fill="currentColor" opacity="0.8"/>
+                        <path d="M4 42 L60 42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M14 50 L50 50" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                    </svg>
+                    
+                    <div class="logo-text-group">
+                        <span class="logo-main">Azure Horizon</span>
+                        <span class="logo-sub">OKINAWA</span>
+                    </div>
+                </a>
+            </h1>
+
+            <nav class="global-nav">
+                <ul>
+                    <li><a href="#concept">Concept</a></li>
+                    <li><a href="#rooms">Rooms</a></li>
+                    <li><a href="#restaurant">Restaurant</a></li>
+                    <li><a href="#access">Access</a></li>
+                    <li><a href="#reservation" class="btn-reserve">ご予約</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="hero-content">
+            <p class="hero-copy">空と海が、<br>ひとつになる場所。</p>
+        </div>
+    </div>
+
+    <main>
+        <section id="concept" class="section-concept fade-in-up">
+            <div class="container">
+                <h2 class="section-title">Concept</h2>
+                <span class="section-subtitle">静寂と碧（あお）の聖域</span>
+                <div class="concept-text">
+                    <p>
+                        沖縄本島、人知れず佇む手つかずの浜辺。<br>
+                        そこに在るのは、波音だけが響くプライベートな空間。
+                    </p>
+                    <p>
+                        「Azure Horizon」は、日常の喧騒を離れ、<br>
+                        ただ海を眺め、風を感じるためだけのホテルです。
+                    </p>
+                    <p>
+                        水平線に溶け込むようなインフィニティプールと、<br>
+                        沖縄の光と影が織りなす建築美。<br>
+                        心洗われる極上のひとときをお約束します。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="rooms" class="section-rooms fade-in-up">
+            <div class="container">
+                <h2 class="section-title">Guest Rooms</h2>
+                <span class="section-subtitle">極上のプライベート空間</span>
+                <div class="room-grid">
+                    <article class="room-card fade-in-up delay-100">
+                        <div class="room-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80');">
+                            </div>
+                        <div class="room-info">
+                            <h3>オーシャン・スイート</h3>
+                            <p>全室オーシャンビュー。広々としたテラスには専用ジャグジーを完備。白を基調としたモダンなインテリアが、青い海を引き立てます。</p>
+                            <ul class="room-spec">
+                                <li>広さ: 60㎡</li>
+                                <li>定員: 2名</li>
+                                <li>キングサイズベッド</li>
+                            </ul>
+                        </div>
+                    </article>
+                    <article class="room-card fade-in-up delay-200">
+                        <div class="room-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80');">
+                             </div>
+                        <div class="room-info">
+                            <h3>ヴィラ・ラグジュアリー</h3>
+                            <p>離れ形式のヴィラタイプ。プライベートプール付きの庭園があり、誰にも邪魔されない至福の時間をお過ごしいただけます。</p>
+                            <ul class="room-spec">
+                                <li>広さ: 90㎡</li>
+                                <li>定員: 4名</li>
+                                <li>プライベートプール付</li>
+                            </ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+<section id="restaurant" class="section-restaurant fade-in-up">
+            <div class="container">
+                <h2 class="section-title">Restaurant</h2>
+                <span class="section-subtitle">ELEGANCE BLUE</span>
+                
+                <div class="restaurant-layout">
+                    <div class="restaurant-desc fade-in-up delay-100">
+                        <p>
+                            地元沖縄の厳選食材と、フレンチの技法が融合した<br>
+                            「琉球ガストロノミー」。
+                        </p>
+                        <p>
+                            夕暮れ時には、刻一刻と表情を変える海を眺めながら、<br>
+                            ソムリエ厳選のヴィンテージワインをお楽しみください。
+                        </p>
+                        
+                        <div class="menu-list">
+                            <h4>Dinner Course Example</h4>
+                            <dl>
+                                <dt>Amuse</dt>
+                                <dd>島野菜のテリーヌ　海ぶどうを添えて</dd>
+                                <dt>Poisson</dt>
+                                <dd>近海産赤マチのポワレ　シークヮーサーのブールブランソース</dd>
+                                <dt>Viande</dt>
+                                <dd>石垣牛フィレ肉のロティ　トリュフの香り</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="restaurant-images">
+                        <div class="img-box fade-in-up delay-200" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80');"></div>
+                        <div class="img-box fade-in-up delay-300" style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80');"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="access" class="section-access fade-in-up">
+            <div class="container">
+                <h2 class="section-title">Access</h2>
+                <span class="section-subtitle">ロケーション</span>
+                <div class="access-content">
+                    <div class="access-info">
+                        <address>
+                            <strong>Azure Horizon Okinawa</strong><br>
+                            〒905-0000<br>
+                            沖縄県架空郡美ら海村字珊瑚 1-2-3<br>
+                            <span class="tel">TEL: 098-XXX-XXXX</span>
+                        </address>
+                        <ul class="access-detail">
+                            <li>那覇空港よりお車で約90分（沖縄自動車道経由）</li>
+                            <li>「美ら海村IC」より15分</li>
+                            <li>※完全予約制の送迎リムジンバスもございます。</li>
+                        </ul>
+                    </div>
+                    <div class="map-wrapper">
+                        <iframe src="https://maps.google.com/maps?q=26.483984,127.850435&z=13&output=embed" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" title="Google Map"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reservation" class="section-reservation fade-in-up">
+            <div class="container">
+                <h2 class="section-title">Reservation</h2>
+                <span class="section-subtitle">ご予約</span>
+                <p class="form-lead">最高の休日をご予約ください。</p>
+                
+                <form action="#" method="POST" class="reservation-form" onsubmit="alert('デモ用サイトのため、実際の予約は送信されません。\n（ここでバックエンドへの送信処理を行います）'); return false;">
+                    <div class="form-group">
+                        <label for="name">お名前 <span class="required">必須</span></label>
+                        <input type="text" id="name" name="name" placeholder="山田 太郎" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">メールアドレス <span class="required">必須</span></label>
+                        <input type="email" id="email" name="email" placeholder="example@domain.com" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">チェックイン日 <span class="required">必須</span></label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nights">宿泊数</label>
+                            <select id="nights" name="nights">
+                                <option value="1">1泊</option>
+                                <option value="2">2泊</option>
+                                <option value="3">3泊</option>
+                                <option value="4">4泊以上</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plan">ご希望のお部屋</label>
+                        <select id="plan" name="plan">
+                            <option value="suite">オーシャン・スイート</option>
+                            <option value="villa">ヴィラ・ラグジュアリー</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">ご要望・ご質問</label>
+                        <textarea id="message" name="message" rows="4" placeholder="記念日のご利用など、お気軽にご相談ください。"></textarea>
+                    </div>
+
+                    <div class="form-submit">
+                        <button type="submit" class="btn-submit">予約内容を確認する</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <p class="copyright">© 2026 Azure Horizon Okinawa. All Rights Reserved.</p>
+        <p class="footer-note">※このサイトはポートフォリオ用の架空のWebサイトです。<br>Unsplashのフリー素材を使用しています。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 監視対象の要素を取得
+            const targets = document.querySelectorAll('.fade-in-up');
+            
+            // IntersectionObserverのオプション設定
+            const options = {
+                root: null, // ビューポートをルートとする
+                rootMargin: '0px',
+                threshold: 0.2 // 要素が20%見えたら発火
+            };
+
+            // コールバック関数
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // 一度表示したら監視を終了（軽量化）
+                    }
+                });
+            }, options);
+
+            // 各要素を監視開始
+            targets.forEach(target => {
+                observer.observe(target);
+            });
+        });
+    </script>
+</body>
+</html>
