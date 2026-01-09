@@ -26,7 +26,8 @@
             
             --spacing-section: 100px;
             --width-container: 1000px;
-            --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1); /* 上品な動きのイージング */
+            --header-height: 80px;
+            --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
         }
 
         html {
@@ -40,7 +41,12 @@
             line-height: 1.8;
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* 横スクロール防止 */
+            overflow-x: hidden;
+        }
+
+        /* メニューオープン時はスクロール禁止 */
+        body.menu-open {
+            overflow: hidden;
         }
 
         img {
@@ -52,7 +58,6 @@
         /* =========================================
            Animation Utilities
            ========================================= */
-        /* 下からふわっと現れるアニメーション */
         .fade-in-up {
             opacity: 0;
             transform: translateY(30px);
@@ -65,7 +70,6 @@
             transform: translateY(0);
         }
 
-        /* 順番に表示させるための遅延クラス */
         .delay-100 { transition-delay: 0.1s; }
         .delay-200 { transition-delay: 0.2s; }
         .delay-300 { transition-delay: 0.3s; }
@@ -98,33 +102,38 @@
         }
 
         /* =========================================
-           Header & Logo Styles
+           Header (Frosted Glass & Layout)
            ========================================= */
         .site-header {
-            background-color: rgba(255, 255, 255, 0.98);
+            /* 磨りガラス効果（高級感の演出） */
+            background-color: rgba(255, 255, 255, 0.75); /* 少し透けさせる */
+            backdrop-filter: blur(12px); /* 背景をぼかす */
+            -webkit-backdrop-filter: blur(12px); /* Safari用 */
+            
             position: fixed;
             top: 0;
             width: 100%;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            z-index: 1000;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
         }
 
         .header-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 10px 20px;
+            padding: 0 20px;
         }
 
         /* ロゴ設定 */
-        .logo {
-            margin: 0;
-            line-height: 1;
-        }
-
+        .logo { margin: 0; line-height: 1; z-index: 1001; position: relative; }
+        
         .logo a {
             display: flex;
             align-items: center;
@@ -133,34 +142,25 @@
             gap: 12px;
             transition: opacity 0.3s;
         }
-
-        .logo a:hover {
-            opacity: 0.7;
-        }
+        .logo a:hover { opacity: 0.7; }
 
         .logo-icon {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             color: var(--color-secondary);
             flex-shrink: 0;
         }
 
-        .logo-text-group {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
+        .logo-text-group { display: flex; flex-direction: column; justify-content: center; }
         .logo-main {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--color-primary);
             letter-spacing: 0.05em;
             line-height: 1.1;
         }
-
         .logo-sub {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             display: block;
             letter-spacing: 0.3em;
             color: var(--color-secondary);
@@ -168,13 +168,16 @@
             font-family: var(--font-sans);
         }
 
-        /* ナビゲーション */
+        /* =========================================
+           Desktop Navigation
+           ========================================= */
         .global-nav ul {
             display: flex;
             list-style: none;
             margin: 0;
             padding: 0;
             gap: 30px;
+            align-items: center;
         }
 
         .global-nav a {
@@ -183,9 +186,10 @@
             font-size: 0.95rem;
             position: relative;
             transition: color 0.3s;
+            font-weight: 500;
         }
 
-        .global-nav a::after {
+        .global-nav a:not(.btn-reserve)::after {
             content: '';
             position: absolute;
             bottom: -5px;
@@ -195,10 +199,7 @@
             background: var(--color-secondary);
             transition: width 0.3s;
         }
-
-        .global-nav a:hover::after {
-            width: 100%;
-        }
+        .global-nav a:not(.btn-reserve):hover::after { width: 100%; }
 
         .btn-reserve {
             background-color: var(--color-primary);
@@ -207,30 +208,69 @@
             border-radius: 2px;
             transition: background-color 0.3s, transform 0.3s !important;
         }
-
         .btn-reserve:hover {
             background-color: #0a355c;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(15, 76, 129, 0.3);
         }
-        
-        .btn-reserve::after { display: none; }
 
         /* =========================================
-           Hero Section
+           Hamburger Menu (Mobile Only)
+           ========================================= */
+        .hamburger-btn {
+            display: none; /* PCでは非表示 */
+            position: relative;
+            z-index: 1001; /* ロゴと同じ高さ */
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .hamburger-btn span {
+            display: block;
+            position: absolute;
+            left: 5px;
+            width: 30px;
+            height: 2px;
+            background-color: var(--color-primary);
+            transition: all 0.4s;
+            border-radius: 2px;
+        }
+
+        /* 3本線の配置 */
+        .hamburger-btn span:nth-of-type(1) { top: 10px; }
+        .hamburger-btn span:nth-of-type(2) { top: 19px; }
+        .hamburger-btn span:nth-of-type(3) { top: 28px; }
+
+        /* ×印へのアニメーション */
+        .hamburger-btn.active span:nth-of-type(1) {
+            transform: translateY(9px) rotate(45deg);
+        }
+        .hamburger-btn.active span:nth-of-type(2) {
+            opacity: 0;
+        }
+        .hamburger-btn.active span:nth-of-type(3) {
+            transform: translateY(-9px) rotate(-45deg);
+        }
+
+        /* =========================================
+           Hero & Contents
            ========================================= */
         .hero {
             height: 100vh;
-            /* パララックス効果（PC用） */
             background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80'); 
             background-size: cover;
             background-position: center;
-            background-attachment: fixed; /* PCでは固定 */
+            background-attachment: fixed;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             position: relative;
+            padding-top: var(--header-height);
         }
 
         .hero-copy {
@@ -247,351 +287,156 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* =========================================
-           Concept
-           ========================================= */
-        .section-concept {
+        /* コンテンツ共通 */
+        .section-concept, .section-rooms, .section-restaurant, .section-access, .section-reservation {
             padding: var(--spacing-section) 0;
         }
-
-        .concept-text {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto;
+        
+        .section-rooms, .section-access, .menu-list, .room-card, .reservation-form {
+            background-color: #fff;
         }
+        
+        .section-reservation { background-color: #eee; }
 
-        .concept-text p {
-            margin-bottom: 2rem;
-        }
+        .concept-text { text-align: center; max-width: 700px; margin: 0 auto; }
+        .concept-text p { margin-bottom: 2rem; }
 
-        /* =========================================
-           Guest Rooms
-           ========================================= */
-        .section-rooms {
-            padding: var(--spacing-section) 0;
-            background-color: var(--color-white);
-        }
-
-        .room-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-        }
-
-        .room-card {
+        /* Grid & Flex Layouts */
+        .room-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        
+        .room-card { 
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            background: #fff;
             transition: transform 0.4s var(--ease-out-cubic), box-shadow 0.4s;
         }
-
-        .room-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-
+        .room-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        
         .room-image-placeholder {
-            background-color: #e0e0e0;
             height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
+            background-color: #e0e0e0;
             background-size: cover;
             background-position: center;
         }
-
-        .room-info {
-            padding: 30px;
+        .room-info { padding: 30px; }
+        .room-info h3 { color: var(--color-primary); margin-top: 0; }
+        .room-spec { 
+            list-style: none; padding: 0; margin-top: 20px; 
+            font-size: 0.9rem; color: #666; 
+            border-top: 1px solid #eee; padding-top: 15px; 
         }
 
-        .room-info h3 {
-            color: var(--color-primary);
-            margin-top: 0;
+        /* Restaurant */
+        .restaurant-layout { display: flex; flex-wrap: wrap; gap: 50px; align-items: center; }
+        .restaurant-desc, .restaurant-images, .access-info, .map-wrapper { flex: 1; min-width: 300px; }
+        .restaurant-images { display: flex; gap: 20px; }
+        .img-box { 
+            flex: 1; height: 300px; 
+            background-size: cover; background-position: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
         }
+        
+        .menu-list { padding: 30px; border-left: 3px solid var(--color-secondary); box-shadow: 0 5px 15px rgba(0,0,0,0.03); margin-top: 40px; }
+        .menu-list h4 { margin-top: 0; color: var(--color-primary); }
+        .menu-list dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; }
+        .menu-list dt { font-weight: bold; color: var(--color-secondary); }
+        .menu-list dd { margin: 0; }
 
-        .room-spec {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #666;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
+        /* Access */
+        .access-content { display: flex; flex-wrap: wrap; gap: 40px; }
+        .tel { display: block; font-size: 1.2rem; color: var(--color-primary); font-weight: bold; margin-top: 10px; }
+        iframe { width: 100%; height: 100%; min-height: 350px; filter: grayscale(0.3); border-radius: 4px; }
 
-        /* =========================================
-           Restaurant
-           ========================================= */
-        .section-restaurant {
-            padding: var(--spacing-section) 0;
+        /* Form */
+        .form-lead { text-align: center; margin-bottom: 40px; }
+        .reservation-form { max-width: 700px; margin: 0 auto; padding: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 4px; }
+        .form-group { margin-bottom: 25px; }
+        .form-row { display: flex; gap: 20px; }
+        .form-row .form-group { flex: 1; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+        .required { background: #cc0000; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 2px; margin-left: 5px; vertical-align: middle; }
+        
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 2px; 
+            font-family: inherit; box-sizing: border-box; transition: border-color 0.3s; 
         }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--color-primary); background-color: #fafafa; }
+        
+        .btn-submit { 
+            display: block; width: 100%; padding: 15px; 
+            background-color: var(--color-primary); color: #fff; 
+            border: none; font-size: 1.1rem; cursor: pointer; 
+            transition: opacity 0.3s, transform 0.3s; border-radius: 2px; 
+        }
+        .btn-submit:hover { opacity: 0.9; transform: scale(1.02); }
 
-        .restaurant-layout {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 50px;
-            align-items: center;
-        }
-
-        .restaurant-desc {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .restaurant-images {
-            flex: 1;
-            min-width: 300px;
-            display: flex;
-            gap: 20px;
-        }
-
-        .img-box {
-            flex: 1;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 0.8rem;
-            background-color: #ccc;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        .menu-list {
-            margin-top: 40px;
-            background: #fff;
-            padding: 30px;
-            border-left: 3px solid var(--color-secondary);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
-        }
-
-        .menu-list h4 {
-            margin-top: 0;
-            color: var(--color-primary);
-        }
-
-        .menu-list dl {
-            margin: 0;
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 10px 20px;
-        }
-
-        .menu-list dt {
-            font-weight: bold;
-            color: var(--color-secondary);
-        }
-
-        .menu-list dd {
-            margin: 0;
-        }
+        /* Footer */
+        .site-footer { background-color: var(--color-primary); color: #fff; text-align: center; padding: 30px 20px; font-size: 0.8rem; }
+        .footer-note { opacity: 0.6; margin-top: 10px; }
 
         /* =========================================
-           Access
-           ========================================= */
-        .section-access {
-            padding: var(--spacing-section) 0;
-            background-color: var(--color-white);
-        }
-
-        .access-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 40px;
-        }
-
-        .access-info {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .access-info address {
-            font-style: normal;
-            margin-bottom: 30px;
-            line-height: 2;
-        }
-
-        .tel {
-            display: block;
-            font-size: 1.2rem;
-            color: var(--color-primary);
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .map-wrapper {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .map-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            min-height: 350px;
-            filter: grayscale(0.3);
-            border-radius: 4px;
-        }
-
-        /* =========================================
-           Reservation
-           ========================================= */
-        .section-reservation {
-            padding: var(--spacing-section) 0;
-            background-color: #eee;
-        }
-
-        .form-lead {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .reservation-form {
-            max-width: 700px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 50px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border-radius: 4px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-        }
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .required {
-            background: #cc0000;
-            color: #fff;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 2px;
-            margin-left: 5px;
-            vertical-align: middle;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="date"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 2px;
-            font-family: inherit;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            background-color: #fafafa;
-        }
-
-        textarea {
-            resize: vertical;
-        }
-
-        .btn-submit {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background-color: var(--color-primary);
-            color: #fff;
-            border: none;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.3s;
-            border-radius: 2px;
-        }
-
-        .btn-submit:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
-
-        /* =========================================
-           Footer
-           ========================================= */
-        .site-footer {
-            background-color: var(--color-primary);
-            color: #fff;
-            text-align: center;
-            padding: 30px 20px;
-            font-size: 0.8rem;
-        }
-
-        .footer-note {
-            opacity: 0.6;
-            margin-top: 10px;
-        }
-
-        /* =========================================
-           Responsive (Mobile) - 修正完全版
+           Responsive (Mobile) - 3本線ハンバーガーメニュー版
            ========================================= */
         @media (max-width: 768px) {
-            /* ヘッダーの調整 */
-            .header-inner {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .global-nav ul {
-                gap: 15px;
-                flex-wrap: wrap;
-                justify-content: center;
+            /* ハンバーガーボタンを表示 */
+            .hamburger-btn {
+                display: block;
             }
 
-            /* ▼▼▼ 画像の修正（重要） ▼▼▼ */
+            /* ナビゲーションをモーダル化 */
+            .global-nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background-color: rgba(255, 255, 255, 0.98); /* ほぼ不透明の白 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transform: translateY(-100%); /* デフォルトは上に隠す */
+                transition: transform 0.4s var(--ease-out-cubic);
+                z-index: 1000; /* ロゴとボタンの下 */
+                opacity: 0;
+            }
+
+            /* クラスがついたら表示 */
+            .global-nav.active {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .global-nav ul {
+                flex-direction: column;
+                gap: 40px;
+                text-align: center;
+            }
+
+            .global-nav a {
+                font-size: 1.2rem; /* スマホ用に文字を大きく */
+                color: var(--color-primary);
+                font-weight: 600;
+            }
+
+            /* 画像・文字のスマホ最適化 */
             .hero {
-                /* fixedを解除してスクロールさせる（これが拡大防止の鍵） */
-                background-attachment: scroll !important; 
-                /* 画像の中心を維持する */
+                background-attachment: scroll !important;
                 background-position: center center !important;
                 background-size: cover;
                 height: 100vh;
             }
 
-            /* ▼▼▼ 文字・改行の修正 ▼▼▼ */
             .hero-copy {
-                font-size: 1.8rem; /* 少し文字を小さくして収まりを良くする */
-                padding: 0 15px;   /* 横幅ギリギリにならないよう余白追加 */
-                line-height: 1.6;  /* 行間を少し広げる */
+                font-size: 1.8rem;
+                padding: 0 15px;
+                line-height: 1.6;
             }
 
-            /* スマホでは「改行タグ」を無効化して、自然な折り返しにする */
-            .hero-copy br {
-                display: none;
-            }
+            .hero-copy br { display: none; }
 
-            /* フォーム等の調整 */
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-
-            .reservation-form {
-                padding: 30px 20px;
-            }
+            .form-row { flex-direction: column; gap: 0; }
+            .reservation-form { padding: 30px 20px; }
+            
+            /* モーダルメニューが開いている時はロゴの色を調整 */
+            .logo a { z-index: 1002; }
         }
     </style>
 </head>
@@ -606,13 +451,18 @@
                         <path d="M4 42 L60 42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         <path d="M14 50 L50 50" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
                     </svg>
-                    
                     <div class="logo-text-group">
                         <span class="logo-main">Azure Horizon</span>
                         <span class="logo-sub">OKINAWA</span>
                     </div>
                 </a>
             </h1>
+
+            <button class="hamburger-btn" aria-label="メニューを開く">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
 
             <nav class="global-nav">
                 <ul>
@@ -661,8 +511,7 @@
                 <span class="section-subtitle">極上のプライベート空間</span>
                 <div class="room-grid">
                     <article class="room-card fade-in-up delay-100">
-                        <div class="room-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80');">
-                            </div>
+                        <div class="room-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80');"></div>
                         <div class="room-info">
                             <h3>オーシャン・スイート</h3>
                             <p>全室オーシャンビュー。広々としたテラスには専用ジャグジーを完備。白を基調としたモダンなインテリアが、青い海を引き立てます。</p>
@@ -674,8 +523,7 @@
                         </div>
                     </article>
                     <article class="room-card fade-in-up delay-200">
-                        <div class="room-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80');">
-                             </div>
+                        <div class="room-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80');"></div>
                         <div class="room-info">
                             <h3>ヴィラ・ラグジュアリー</h3>
                             <p>離れ形式のヴィラタイプ。プライベートプール付きの庭園があり、誰にも邪魔されない至福の時間をお過ごしいただけます。</p>
@@ -813,29 +661,41 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 監視対象の要素を取得
+            /* 1. スクロール監視（要素のフェードイン） */
             const targets = document.querySelectorAll('.fade-in-up');
+            const options = { root: null, rootMargin: '0px', threshold: 0.2 };
             
-            // IntersectionObserverのオプション設定
-            const options = {
-                root: null, // ビューポートをルートとする
-                rootMargin: '0px',
-                threshold: 0.2 // 要素が20%見えたら発火
-            };
-
-            // コールバック関数
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
-                        observer.unobserve(entry.target); // 一度表示したら監視を終了（軽量化）
+                        observer.unobserve(entry.target);
                     }
                 });
             }, options);
 
-            // 各要素を監視開始
-            targets.forEach(target => {
-                observer.observe(target);
+            targets.forEach(target => observer.observe(target));
+
+            /* 2. ハンバーガーメニュー制御 */
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            const nav = document.querySelector('.global-nav');
+            const navLinks = document.querySelectorAll('.global-nav a');
+            const body = document.body;
+
+            // ボタンクリック時の動作
+            hamburgerBtn.addEventListener('click', function() {
+                this.classList.toggle('active'); // ボタンを×印にする
+                nav.classList.toggle('active');  // メニューを表示する
+                body.classList.toggle('menu-open'); // 背景スクロールを禁止
+            });
+
+            // リンクをクリックしたらメニューを閉じる
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    hamburgerBtn.classList.remove('active');
+                    nav.classList.remove('active');
+                    body.classList.remove('menu-open');
+                });
             });
         });
     </script>
